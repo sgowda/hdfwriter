@@ -1,11 +1,13 @@
 '''
 Base code for 'saveHDF' feature in experiments for writing data to an HDF file during experiment
 '''
-
 import tables
 import numpy as np
+import tempfile
+import shutil
 
 compfilt = tables.Filters(complevel=5, complib="zlib", shuffle=True)
+
 
 class MsgTable(tables.IsDescription):
     '''
@@ -14,12 +16,13 @@ class MsgTable(tables.IsDescription):
     time = tables.UIntCol()
     msg = tables.StringCol(256)
 
+
 class HDFWriter(object):
     ''' 
     Used by the SaveHDF feature (features.hdf_features.SaveHDF) to save data 
     to an HDF file in "real-time", as the task is running
     '''
-    def __init__(self, filename):
+    def __init__(self, filename='', verbose=True):
         '''
         Constructor for HDFWriter
 
@@ -32,7 +35,17 @@ class HDFWriter(object):
         -------
         HDFWriter instance
         '''
-        print("HDFWriter: Saving datafile to %s"%filename)
+        if filename == '':
+            # If no filename specified, create a temporary file which can be renamed later
+            hdf_file = tempfile.NamedTemporaryFile(suffix='.h5', delete=False)
+            hdf_file.flush()
+            hdf_file.close()
+            filename = hdf_file.name
+
+        self.verbose = verbose
+        if self.verbose:
+            print("HDFWriter: Saving datafile to %s"%filename)
+
         self.h5 = tables.open_file(filename, "w")
         self.data = {}
         self.msgs = {}
@@ -53,9 +66,11 @@ class HDFWriter(object):
 
         Returns
         -------
-        None
+        np.array of shape (1,)
+            dtype of return array matches input dtype
         '''
-        print("HDFWriter registered %r" % name)
+        if self.verbose:
+            print("HDFWriter registered %r" % name)
         if dtype.subdtype is not None:
             #just a simple dtype with a shape
             dtype, sliceshape = dtype.subdtype
@@ -68,6 +83,8 @@ class HDFWriter(object):
         if include_msgs:
             msg = self.h5.create_table("/", name+"_msgs", MsgTable, filters=compfilt)
             self.msgs[name] = msg
+
+        return np.zeros((1,), dtype=dtype)
     
     def send(self, system, data):
         '''
@@ -128,10 +145,20 @@ class HDFWriter(object):
         if system in self.data:
             self.data[system].attrs[attr] = value
     
-    def close(self):
+    def close(self, fname=None):
         '''
         Close the HDF file so that it saves properly after the process terminates
+
+        Parameters
+        ----------
+        fname : string, optional
+            Created HDF5 file gets renamed to this filename if specified
         '''
         self.h5.close()
-        print("Closed hdf")
+        if self.verbose:
+            print("Closed hdf")
 
+        if not fname is None:
+            shutil.copyfile(self.h5.filename, fname)
+            if self.verbose:
+                print("Copied output file to %s" % fname)
