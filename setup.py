@@ -6,8 +6,8 @@ setup(
   version = '0.1',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Stream data to an HDF5 File',   # Give a short description about your library
-  author = 'Carmena Lab',                   # Type in your name
-  url = 'https://github.com/carmenalab/brain-python-interface/tree/unstable_py3/riglib/hdfwriter',   # Provide either the link to your github or to your website
+  author = 'James Gao, Helene Moorman, Suraj Gowda',                   # Type in your name
+  url = 'https://github.com/sgowda/hdfwriter',   # Provide either the link to your github or to your website
   # download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',    # I explain this later on
   keywords = ['HDF5', 'Data Serialization'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
