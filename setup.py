@@ -8,7 +8,7 @@ setup(
   description = 'Stream data to an HDF5 File',   # Give a short description about your library
   author = 'James Gao, Helene Moorman, Suraj Gowda',                   # Type in your name
   url = 'https://github.com/sgowda/hdfwriter',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/sgowda/hdfwriter/archive/v0.1.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/sgowda/hdfwriter/archive/v0.1.1.tar.gz',    # I explain this later on
   keywords = ['HDF5', 'Data Serialization'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'h5py',
