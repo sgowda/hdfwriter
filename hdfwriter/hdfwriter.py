@@ -5,6 +5,7 @@ import tables
 import numpy as np
 import tempfile
 import shutil
+import re
 
 compfilt = tables.Filters(complevel=5, complib="zlib", shuffle=True)
 
@@ -42,14 +43,30 @@ class HDFWriter(object):
             hdf_file.close()
             filename = hdf_file.name
 
+        self.filename = filename
         self.verbose = verbose
         if self.verbose:
             print("HDFWriter: Saving datafile to %s"%filename)
 
-        self.h5 = tables.open_file(filename, "w")
+        self.open_file()
+        
         self.data = {}
         self.msgs = {}
-        self.f = []
+
+    def open_file(self):
+        print("HDFWriter: opening file")
+        self.h5 = tables.open_file(self.filename, mode="a")
+
+        top_level_tables = self.h5.root._v_children.keys()
+        for key in top_level_tables:
+            if '_msgs' in key:
+                # message group
+                m = re.match('(.*)_msgs', key)
+                system_key = m.group(1) 
+                self.msgs[system_key] = getattr(self.h5.root, key)
+            else:
+                self.data[key] = getattr(self.h5.root, key)
+
     
     def register(self, name, dtype, include_msgs=True):
         '''
@@ -162,3 +179,8 @@ class HDFWriter(object):
             shutil.copyfile(self.h5.filename, fname)
             if self.verbose:
                 print("Copied output file to %s" % fname)
+
+    def save(self):
+        """Save the HDF5 file by closing it and reopening"""
+        self.close()
+        self.open_file()

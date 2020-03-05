@@ -81,6 +81,34 @@ class TestHDFWriter(unittest.TestCase):
         if os.path.exists(fname):
             os.remove(fname)        
 
+    def test_save(self):
+        print("\n\ntest_save")
+        fname = "save_test_file.h5"
+        if os.path.exists(fname):
+            os.remove(fname)            
+
+        hdfwriter = HDFWriter(fname)
+
+        dtype = np.dtype([("x", "f8", (1,))])
+
+        data = hdfwriter.register("data", dtype, include_msgs=False)
+        data['x'] = 2
+        hdfwriter.send("data", data)
+
+        hdfwriter.save()
+        data['x'] = 3
+        hdfwriter.send("data", data)  
+
+        hdfwriter.close()      
+
+        hdf = tables.open_file(fname)
+        self.assertTrue(hdf.root.data[0]['x'] == 2)
+        self.assertTrue(hdf.root.data[1]['x'] == 3)
+        hdf.close()
+
+        if os.path.exists(fname):
+            os.remove(fname)            
+
     def tearDown(self):
         if os.path.exists(self.test_output_fname):
             os.remove(self.test_output_fname)
