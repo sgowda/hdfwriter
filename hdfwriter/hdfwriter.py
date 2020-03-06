@@ -144,7 +144,6 @@ class HDFWriter(object):
     def sendAttr(self, system, attr, value):
         '''
         While the HDF writer process is running, set an attribute of the table
-        (not sure that this has ever been tested..)
 
         Parameters
         ----------
