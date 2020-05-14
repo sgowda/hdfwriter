@@ -67,7 +67,7 @@ class HDFWriter(object):
                 self.data[key] = getattr(self.h5.root, key)
 
     
-    def register(self, name, dtype, include_msgs=True):
+    def register(self, name, dtype, include_msgs=False):
         '''
         Create a table in the HDF file corresponding to the specified source name and data type
 
