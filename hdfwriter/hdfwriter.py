@@ -47,11 +47,10 @@ class HDFWriter(object):
         self.verbose = verbose
         if self.verbose:
             print("HDFWriter: Saving datafile to %s"%filename)
-
-        self.open_file()
         
         self.data = {}
         self.msgs = {}
+        self.open_file()
 
     def open_file(self):
         print("HDFWriter: opening file")
@@ -179,7 +178,7 @@ class HDFWriter(object):
             if self.verbose:
                 print("Copied output file to %s" % fname)
 
-    def save(self):
+    def save(self, fname=None):
         """Save the HDF5 file by closing it and reopening"""
-        self.close()
+        self.close(fname=fname)
         self.open_file()
