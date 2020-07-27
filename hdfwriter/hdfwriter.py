@@ -19,11 +19,11 @@ class MsgTable(tables.IsDescription):
 
 
 class HDFWriter(object):
-    ''' 
-    Used by the SaveHDF feature (features.hdf_features.SaveHDF) to save data 
+    '''
+    Used by the SaveHDF feature (features.hdf_features.SaveHDF) to save data
     to an HDF file in "real-time", as the task is running
     '''
-    def __init__(self, filename='', verbose=True):
+    def __init__(self, filename='', verbose=True, mode="a"):
         '''
         Constructor for HDFWriter
 
@@ -47,26 +47,26 @@ class HDFWriter(object):
         self.verbose = verbose
         if self.verbose:
             print("HDFWriter: Saving datafile to %s"%filename)
-        
+
         self.data = {}
         self.msgs = {}
-        self.open_file()
+        self.open_file(mode=mode)
 
-    def open_file(self):
+    def open_file(self, mode="a"):
         print("HDFWriter: opening file")
-        self.h5 = tables.open_file(self.filename, mode="a")
+        self.h5 = tables.open_file(self.filename, mode=mode)
 
         top_level_tables = self.h5.root._v_children.keys()
         for key in top_level_tables:
             if '_msgs' in key:
                 # message group
                 m = re.match('(.*)_msgs', key)
-                system_key = m.group(1) 
+                system_key = m.group(1)
                 self.msgs[system_key] = getattr(self.h5.root, key)
             else:
                 self.data[key] = getattr(self.h5.root, key)
 
-    
+
     def register(self, name, dtype, include_msgs=False):
         '''
         Create a table in the HDF file corresponding to the specified source name and data type
@@ -90,7 +90,7 @@ class HDFWriter(object):
         if dtype.subdtype is not None:
             #just a simple dtype with a shape
             dtype, sliceshape = dtype.subdtype
-            arr = self.h5.create_earray("/", name, tables.Atom.from_dtype(dtype), 
+            arr = self.h5.create_earray("/", name, tables.Atom.from_dtype(dtype),
                 shape=(0,)+sliceshape, filters=compfilt)
         else:
             arr = self.h5.create_table("/", name, dtype, filters=compfilt)
@@ -101,7 +101,7 @@ class HDFWriter(object):
             self.msgs[name] = msg
 
         return np.zeros((1,), dtype=dtype)
-    
+
     def send(self, system, data):
         '''
         Add a new row to the HDF table for 'system' and fill it with the 'data' values
@@ -133,7 +133,7 @@ class HDFWriter(object):
         Returns
         -------
         None
-        '''  
+        '''
         for system in list(self.msgs.keys()):
             row = self.msgs[system].row
             row['time'] = len(self.data[system])
@@ -148,7 +148,7 @@ class HDFWriter(object):
         ----------
         system : string
             Name of the table where the attribute should be set
-        attr : string 
+        attr : string
             Name of the attribute
         value : object
             Value of the attribute to set
@@ -159,7 +159,7 @@ class HDFWriter(object):
         '''
         if system in self.data:
             self.data[system].attrs[attr] = value
-    
+
     def close(self, fname=None):
         '''
         Close the HDF file so that it saves properly after the process terminates
