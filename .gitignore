@@ -1,2 +1,5 @@
 MANIFEST
 dist/*
+
+hdfwriter.egg-info/*
+hdfwriter/__pycache__/*
